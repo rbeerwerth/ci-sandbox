@@ -33,34 +33,26 @@ jobs:
     - name: setup dependencies
       shell: powershell
       run: |
-        vcpkg install boost --triplet x64-windows
-        $Env:Path += ";C:\msys64\usr\bin"
         cd ${{github.workspace}}
         mkdir deps
-        wget http://apps.jcns.fz-juelich.de/src/WinLibs/libgsl.win64.zip -O ${{runner.temp}}\libgsl.zip
-        7z x ${{runner.temp}}\libgsl.zip -odeps
-        wget http://apps.jcns.fz-juelich.de/src/WinLibs/libtiff.win64.zip -O ${{runner.temp}}\libtiff.zip
-        7z x ${{runner.temp}}\libtiff.zip -odeps
-        wget http://apps.jcns.fz-juelich.de/src/WinLibs/libcblas.win64.zip -O ${{runner.temp}}\libcblas.zip
-        7z x ${{runner.temp}}\libcblas.zip -odeps
-        wget http://apps.jcns.fz-juelich.de/src/WinLibs/libfftw3.win64.zip -O ${{runner.temp}}\libfftw3.zip
-        7z x ${{runner.temp}}\libfftw3.zip -odeps
+        wget http://apps.jcns.fz-juelich.de/redmine/attachments/download/350/local_x64.zip -O ${{runner.temp}}\local_x64.zip
+        7z x ${{runner.temp}}\local_x64.zip -odeps
         dir deps
-        dir deps/include
+        dir deps/local_x64
         
     - name: Install Python packages
       run: |
         python -m pip install --upgrade pip
         python -m pip install wheel setuptools
-        python -m pip install numpy scipy matplotlib
+        python -m pip install numpy matplotlib
         
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
       with:
-        version: '5.15.0'
+        version: '5.14.2'
         host: 'windows'
         target: 'desktop'
-        arch: 'win64_msvc2019_64'
+        arch: 'win64_msvc2017_64'
         dir: '${{ github.workspace }}/qt5/'
         install-deps: 'true'
         modules: 'qtcharts qtwebengine'
@@ -91,20 +83,19 @@ jobs:
         CCACHE_COMPRESSLEVEL: "6"
         CCACHE_MAXSIZE: "400M"
       run: |
-        vcpkg integrate install
-        set PATH=${{github.workspace}}\deps\lib;%PATH%
-        set QTDIR=${{github.workspace}}\qt5\Qt\5.15.0\msvc2019_64
-        set CMAKE_INC_PATH=${{github.workspace}}/deps/include
-        echo %BOOST_ROOT%
+        set OPTLIBS=${{github.workspace}}\deps\local_x64
+        set PATH=%OPTLIBS%\lib;%PATH%
+        set QTDIR=${{github.workspace}}\qt5\Qt\5.14.2\msvc2017_64
+        echo %OPTLIBS%
         echo %QTDIR%
-        echo %CMAKE_INC_PATH%
+        echo %PATH%
         cd ${{github.workspace}}
         git clone --recursive https://github.com/gpospelov/BornAgain.git
         cd BornAgain
-        git checkout NoManhattan
+        git checkout TrWinBuild
         mkdir build
         cd build
-        cmake -G "Visual Studio 16 2019" -DCMAKE_INCLUDE_PATH=%CMAKE_INC_PATH% -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake ..
+        cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_INCLUDE_PATH=%OPTLIBS%/include -DCMAKE_LIBRARY_PATH=%OPTLIBS%/lib ..
         cmake --build . --config Release -j4
         
     - name: Run unittest core
@@ -113,14 +104,5 @@ jobs:
       run: |
         echo %PATH%
         echo %QTDIR%
-        cd ${{github.workspace}}\BornAgain\build\bin
-        UnitTestCore.exe
-          
-    - name: Run unittest GUI
-      shell: cmd
-      if: failure()
-      run: |
-        echo %PATH%
-        echo %QTDIR%
-        cd ${{github.workspace}}\BornAgain\build\bin
-        UnitTestGUI.exe
+        cd ${{github.workspace}}\BornAgain\build
+        ctest
