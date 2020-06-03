@@ -33,6 +33,7 @@ jobs:
     - name: setup dependencies
       shell: powershell
       run: |
+        $Env:Path += ";C:\msys64\usr\bin"
         cd ${{github.workspace}}
         mkdir deps
         wget http://apps.jcns.fz-juelich.de/redmine/attachments/download/350/local_x64.zip -O ${{runner.temp}}\local_x64.zip
@@ -85,7 +86,7 @@ jobs:
       run: |
         set OPTLIBS=${{github.workspace}}\deps\local_x64
         set QTDIR=${{github.workspace}}\qt5\Qt\5.14.2\msvc2017_64
-        set PATH=%OPTLIBS%\lib;%QTDIR\bin;%PATH%
+        set PATH=%OPTLIBS%\lib;%QTDIR%\bin;%PATH%
         echo %OPTLIBS%
         echo %QTDIR%
         echo %PATH%
