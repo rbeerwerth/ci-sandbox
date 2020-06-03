@@ -31,7 +31,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
         
     - name: setup dependencies
-      shell: powershell
+      shell: cmd
       run: |
         $Env:Path += ";C:\msys64\usr\bin"
         cd ${{github.workspace}}
@@ -99,20 +99,10 @@ jobs:
         cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_INCLUDE_PATH=%OPTLIBS%/include -DCMAKE_LIBRARY_PATH=%OPTLIBS%/lib ..
         cmake --build . --config Release -j4
         
-    - name: Run unittest core
+    - name: Run functional tests
       shell: cmd
-      if: failure()
       run: |
         echo %PATH%
         echo %QTDIR%
-        cd ${{github.workspace}}\BornAgain\build\bin
-        UnitTestCore.exe
-          
-    - name: Run unittest GUI
-      shell: cmd
-      if: failure()
-      run: |
-        echo %PATH%
-        echo %QTDIR%
-        cd ${{github.workspace}}\BornAgain\build\bin
-        UnitTestGUI.exe
+        cd ${{github.workspace}}\BornAgain\build
+        ctest
