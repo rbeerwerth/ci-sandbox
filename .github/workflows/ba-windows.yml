@@ -31,7 +31,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
         
     - name: setup dependencies
-      shell: cmd
+      shell: powershell
       run: |
         $Env:Path += ";C:\msys64\usr\bin"
         cd ${{github.workspace}}
