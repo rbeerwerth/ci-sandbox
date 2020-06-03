@@ -84,8 +84,8 @@ jobs:
         CCACHE_MAXSIZE: "400M"
       run: |
         set OPTLIBS=${{github.workspace}}\deps\local_x64
-        set PATH=%OPTLIBS%\lib;%PATH%
         set QTDIR=${{github.workspace}}\qt5\Qt\5.14.2\msvc2017_64
+        set PATH=%OPTLIBS%\lib;%QTDIR\bin;%PATH%
         echo %OPTLIBS%
         echo %QTDIR%
         echo %PATH%
@@ -98,11 +98,20 @@ jobs:
         cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_INCLUDE_PATH=%OPTLIBS%/include -DCMAKE_LIBRARY_PATH=%OPTLIBS%/lib ..
         cmake --build . --config Release -j4
         
-    - name: Run unittest core
+   - name: Run unittest core
       shell: cmd
       if: failure()
       run: |
         echo %PATH%
         echo %QTDIR%
-        cd ${{github.workspace}}\BornAgain\build
-        ctest
+        cd ${{github.workspace}}\BornAgain\build\bin
+        UnitTestCore.exe
+          
+    - name: Run unittest GUI
+      shell: cmd
+      if: failure()
+      run: |
+        echo %PATH%
+        echo %QTDIR%
+        cd ${{github.workspace}}\BornAgain\build\bin
+        UnitTestGUI.exe
