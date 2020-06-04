@@ -82,7 +82,7 @@ jobs:
         CCACHE_DIR: $GITHUB_WORKSPACE/.ccache
         CCACHE_COMPRESS: "true"
         CCACHE_COMPRESSLEVEL: "6"
-        CCACHE_MAXSIZE: "400M"
+        CCACHE_MAXSIZE: "1000M"
       run: |
         set OPTLIBS=${{github.workspace}}\deps\local_x64
         set QTDIR=${{github.workspace}}\qt5\Qt\5.14.2\msvc2017_64
@@ -105,4 +105,12 @@ jobs:
         echo %PATH%
         echo %QTDIR%
         cd ${{github.workspace}}\BornAgain\build
-        ctest
+        ctest -LE Fullcheck --output-on-failure
+
+    - name: Functional test output
+      if: failure()
+      shell: cmd
+      with:
+        cd ${{github.workspace}}\BornAgain\build
+        type Testing/Temporary/LastTest.log
+
