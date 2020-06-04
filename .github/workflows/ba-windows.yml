@@ -110,7 +110,7 @@ jobs:
     - name: Functional test output
       if: failure()
       shell: cmd
-      with:
+      run: |
         cd ${{github.workspace}}\BornAgain\build
         type Testing/Temporary/LastTest.log
 
