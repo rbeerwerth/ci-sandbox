@@ -33,11 +33,14 @@ jobs:
     - name: setup dependencies
       shell: powershell
       run: |
+        Get-Date -Format G
         $Env:Path += ";C:\msys64\usr\bin"
         cd ${{github.workspace}}
         mkdir deps
+        Get-Date -Format G
         wget http://apps.jcns.fz-juelich.de/redmine/attachments/download/350/local_x64.zip -O ${{runner.temp}}\local_x64.zip
         7z x ${{runner.temp}}\local_x64.zip -odeps
+        Get-Date -Format G
         dir deps
         dir deps/local_x64
         
@@ -96,8 +99,9 @@ jobs:
         git checkout TrWinBuild
         mkdir build
         cd build
-        cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_INCLUDE_PATH=%OPTLIBS%/include -DCMAKE_LIBRARY_PATH=%OPTLIBS%/lib ..
+        cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_INCLUDE_PATH=%OPTLIBS%/include -DCMAKE_LIBRARY_PATH=%OPTLIBS%/lib -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ..
         cmake --build . --config Release -j4
+        ccache -s
         
     - name: Run functional tests
       shell: cmd
