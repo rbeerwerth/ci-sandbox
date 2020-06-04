@@ -102,8 +102,11 @@ jobs:
     - name: Run functional tests
       shell: cmd
       run: |
-        echo %PATH%
         echo %QTDIR%
+        echo %OPTLIBS%
+        set OPTLIBS=${{github.workspace}}\deps\local_x64
+        set PATH=%OPTLIBS%\lib;%QTDIR%\bin;%PATH%
+        echo %PATH%
         cd ${{github.workspace}}\BornAgain\build
         ctest -LE Fullcheck --output-on-failure
 
@@ -112,5 +115,5 @@ jobs:
       shell: cmd
       run: |
         cd ${{github.workspace}}\BornAgain\build
-        type Testing/Temporary/LastTest.log
+        type Testing\Temporary\LastTest.log
 
