@@ -131,7 +131,7 @@ jobs:
         set PATH=%OPTLIBS%\lib;%QTDIR%\bin;%PATH%
         echo %PATH%
         cd ${{github.workspace}}\BornAgain\build
-        ctest -j4 --output-on-failure
+        ctest -LE Fullcheck --output-on-failure
 
     - name: Functional test output
       if: failure()
